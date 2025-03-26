@@ -134,6 +134,7 @@ public class CuscreditDAO extends ConnControl {
             log.info(Common.RESULT + code);
         } finally {
             closePS(pstmt);
+            closeConn(conn);
             log.info(Common.ARROW + "insert" + Common.END_B);
         }
         return code;
@@ -202,6 +203,7 @@ public class CuscreditDAO extends ConnControl {
         } finally {
             closePS(pstmt);
             closeRS(rs);
+            closeConn(conn);
             log.info(Common.ARROW + "selectKey" + Common.END_B);
         }
         return out;
@@ -272,6 +274,7 @@ public class CuscreditDAO extends ConnControl {
         } finally {
             closePS(pstmt);
             closeRS(rs);
+            closeConn(conn);
             log.info(Common.ARROW + "selectCardHolderActivated" + Common.END_B);
         }
         return out;
@@ -312,6 +315,7 @@ public class CuscreditDAO extends ConnControl {
             log.info(Common.RESULT + out);
         } finally {
             closePS(pstmt);
+            closeConn(conn);
             log.info(Common.ARROW + "updateCardApprovalStatus" + Common.END_B);
         }
         return out;
@@ -342,6 +346,7 @@ public class CuscreditDAO extends ConnControl {
             log.info(Common.RESULT + out);
         } finally {
             closePS(pstmt);
+            closeConn(conn);
             log.info(Common.ARROW + "updateActivationRecord" + Common.END_B);
         }
         return out;
