@@ -9,6 +9,7 @@ import com.ntou.db.cuscredit.CuscreditVO;
 import com.ntou.sysintegrat.mailserver.JavaMail;
 import com.ntou.sysintegrat.mailserver.MailVO;
 import com.ntou.tool.Common;
+import com.ntou.tool.ExecutionTimer;
 import com.ntou.tool.ResTool;
 import com.ntou.tool.DateTool;
 import lombok.NoArgsConstructor;
@@ -26,8 +27,12 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class SC0105001 {
     public Response doAPI() throws Exception {
-        log.info(Common.API_DIVIDER + Common.START_B + Common.API_DIVIDER);
+        ExecutionTimer.startStage(ExecutionTimer.ExecutionModule.APPLICATION.getValue());
+
+		log.info(Common.API_DIVIDER + Common.START_B + Common.API_DIVIDER);
         SC0105001Res res = new SC0105001Res();
+        
+		ExecutionTimer.startStage(ExecutionTimer.ExecutionModule.DATABASE.getValue());
 
 //      1. 到資料庫找到要寄送帳單的所有客
         ArrayList<BillrecordVO> billList = new BillrecordDAO()
@@ -35,6 +40,8 @@ public class SC0105001 {
 //      2. 整理,將資料以卡身分證和卡別分組
         Map<String, List<BillrecordVO>> groupedData = billList.stream()
                 .collect(Collectors.groupingBy(t -> t.getCid() + t.getCardType()));
+        
+		ExecutionTimer.endStage(ExecutionTimer.ExecutionModule.DATABASE.getValue());
 
         String yyyymm = DateTool.getFirstDayOfMonth().substring(0,7);
         MailVO vo = new MailVO();
@@ -75,7 +82,10 @@ public class SC0105001 {
 
         log.info(Common.RES + res);
         log.info(Common.API_DIVIDER + Common.END_B + Common.API_DIVIDER);
-        return Response.status(Response.Status.CREATED).entity(res).build();
+        
+		ExecutionTimer.endStage(ExecutionTimer.ExecutionModule.APPLICATION.getValue());
+        ExecutionTimer.exportTimings(this.getClass().getSimpleName() + "_" + DateTool.getYYYYmmDDhhMMss() + ".txt");
+		return Response.status(Response.Status.CREATED).entity(res).build();
     }
 
     private BillofmonthVO setBillofmonthVO(String cid, String cardType, List<BillrecordVO> billList, String amt, String yyyymm){

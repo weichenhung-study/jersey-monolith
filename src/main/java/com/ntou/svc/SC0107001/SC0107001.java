@@ -7,6 +7,8 @@ import com.ntou.db.cuscredit.CuscreditVO;
 import com.ntou.sysintegrat.mailserver.JavaMail;
 import com.ntou.sysintegrat.mailserver.MailVO;
 import com.ntou.tool.Common;
+import com.ntou.tool.ExecutionTimer;
+import com.ntou.tool.ExecutionTimer;
 import com.ntou.tool.ResTool;
 import com.ntou.tool.DateTool;
 import lombok.NoArgsConstructor;
@@ -20,13 +22,16 @@ import java.util.ArrayList;
 @NoArgsConstructor
 public class SC0107001 {
     public Response doAPI(SC0107001Req req) throws Exception {
-        log.info(Common.API_DIVIDER + Common.START_B + Common.API_DIVIDER);
+        ExecutionTimer.startStage(ExecutionTimer.ExecutionModule.APPLICATION.getValue());
+
+		log.info(Common.API_DIVIDER + Common.START_B + Common.API_DIVIDER);
         log.info(Common.REQ + req);
         SC0107001Res res = new SC0107001Res();
 
         if(!req.checkReq())
             ResTool.regularThrow(res, SC0107001RC.T171A.getCode(), SC0107001RC.T171A.getContent(), req.getErrMsg());
 
+		ExecutionTimer.startStage(ExecutionTimer.ExecutionModule.DATABASE.getValue());
         BillofmonthDAO daoBillofmonth = new BillofmonthDAO();
         BillofmonthVO vo = setUpdatePayDate(req);
         ArrayList<BillofmonthVO> listBillofmonth = daoBillofmonth.findPaidBills(vo);
@@ -40,12 +45,16 @@ public class SC0107001 {
             sendMail(req, listBillofmonth.get(0));
         } else
             ResTool.commonThrow(res, SC0107001RC.T171D.getCode(), SC0107001RC.T171D.getContent());
+        ExecutionTimer.endStage(ExecutionTimer.ExecutionModule.DATABASE.getValue());
 
         ResTool.setRes(res, SC0107001RC.T1710.getCode(), SC0107001RC.T1710.getContent());
 
         log.info(Common.RES + res);
         log.info(Common.API_DIVIDER + Common.END_B + Common.API_DIVIDER);
-        return Response.status(Response.Status.CREATED).entity(res).build();
+        
+		ExecutionTimer.endStage(ExecutionTimer.ExecutionModule.APPLICATION.getValue());
+        ExecutionTimer.exportTimings(this.getClass().getSimpleName() + "_" + DateTool.getYYYYmmDDhhMMss() + ".txt");
+		return Response.status(Response.Status.CREATED).entity(res).build();
     }
     private void sendMail(SC0107001Req req,BillofmonthVO key) throws Exception {
         MailVO vo = new MailVO();

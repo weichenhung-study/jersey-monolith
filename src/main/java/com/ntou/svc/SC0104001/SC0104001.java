@@ -7,6 +7,7 @@ import com.ntou.db.cuscredit.CuscreditVO;
 import com.ntou.sysintegrat.mailserver.JavaMail;
 import com.ntou.sysintegrat.mailserver.MailVO;
 import com.ntou.tool.Common;
+import com.ntou.tool.ExecutionTimer;
 import com.ntou.tool.ResTool;
 import com.ntou.tool.DateTool;
 import lombok.NoArgsConstructor;
@@ -20,13 +21,16 @@ import java.util.UUID;
 @NoArgsConstructor
 public class SC0104001 {
     public Response doAPI(SC0104001Req req) throws Exception {
-        log.info(Common.API_DIVIDER + Common.START_B + Common.API_DIVIDER);
+        ExecutionTimer.startStage(ExecutionTimer.ExecutionModule.APPLICATION.getValue());
+
+		log.info(Common.API_DIVIDER + Common.START_B + Common.API_DIVIDER);
         log.info(Common.REQ + req);
         SC0104001Res res = new SC0104001Res();
 
         if(!req.checkReq())
             ResTool.regularThrow(res, SC0104001RC.T141A.getCode(), SC0104001RC.T141A.getContent(), req.getErrMsg());
-
+        
+		ExecutionTimer.startStage(ExecutionTimer.ExecutionModule.DATABASE.getValue());
         CuscreditDAO daoCuscredit = new CuscreditDAO();
         CuscreditVO voCuscredit = daoCuscredit.selectCardHolderActivated(
                 req.getCid(), req.getCardType(), req.getCardNum());
@@ -38,6 +42,7 @@ public class SC0104001 {
         int insertResult = new BillrecordDAO().insertCusDateBill(voBillrecordInsert(req));
         if(insertResult !=1)
             ResTool.commonThrow(res, SC0104001RC.T141C.getCode(), SC0104001RC.T141C.getContent());
+        ExecutionTimer.endStage(ExecutionTimer.ExecutionModule.DATABASE.getValue());
 
         MailVO vo = new MailVO();
         vo.setEmailAddr(voCuscredit.getEmail());
@@ -56,7 +61,10 @@ public class SC0104001 {
 
         log.info(Common.RES + res);
         log.info(Common.API_DIVIDER + Common.END_B + Common.API_DIVIDER);
-        return Response.status(Response.Status.CREATED).entity(res).build();
+        
+		ExecutionTimer.endStage(ExecutionTimer.ExecutionModule.APPLICATION.getValue());
+        ExecutionTimer.exportTimings(this.getClass().getSimpleName() + "_" + DateTool.getYYYYmmDDhhMMss() + ".txt");
+		return Response.status(Response.Status.CREATED).entity(res).build();
     }
 
     private BillrecordVO voBillrecordInsert(SC0104001Req req){

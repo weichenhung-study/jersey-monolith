@@ -5,6 +5,7 @@ import com.ntou.db.cuscredit.CuscreditVO;
 import com.ntou.sysintegrat.mailserver.JavaMail;
 import com.ntou.sysintegrat.mailserver.MailVO;
 import com.ntou.tool.Common;
+import com.ntou.tool.ExecutionTimer;
 import com.ntou.tool.ResTool;
 import com.ntou.tool.DateTool;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,8 @@ import javax.ws.rs.core.Response;
 @NoArgsConstructor
 public class SC0101001 {
     public Response doAPI(SC0101001Req req) throws Exception {
+        ExecutionTimer.startStage(ExecutionTimer.ExecutionModule.APPLICATION.getValue());
+
         log.info(Common.API_DIVIDER + Common.START_B + Common.API_DIVIDER);
         log.info(Common.REQ + req);
         SC0101001Res res = new SC0101001Res();
@@ -24,6 +27,7 @@ public class SC0101001 {
         if(!req.checkReq())
             ResTool.regularThrow(res, SC0101001RC.T111A.getCode(), SC0101001RC.T111A.getContent(), req.getErrMsg());
 
+        ExecutionTimer.startStage(ExecutionTimer.ExecutionModule.DATABASE.getValue());
         CuscreditDAO daoCuscredit = new CuscreditDAO();
         CuscreditVO cusDateBillList = daoCuscredit.selectKey(
                 req.getCid(), req.getCardType());
@@ -34,12 +38,16 @@ public class SC0101001 {
         int bInsertCusDateBill = daoCuscredit.insert(voCuscreditInsert(req));
         if(bInsertCusDateBill !=1)
             ResTool.commonThrow(res, SC0101001RC.T111C.getCode(), SC0101001RC.T111C.getContent());
+        ExecutionTimer.endStage(ExecutionTimer.ExecutionModule.DATABASE.getValue());
 
         sendMail(req);
         ResTool.setRes(res, SC0101001RC.T1110.getCode(), SC0101001RC.T1110.getContent());
 
         log.info(Common.RES + res);
         log.info(Common.API_DIVIDER + Common.END_B + Common.API_DIVIDER);
+
+        ExecutionTimer.endStage(ExecutionTimer.ExecutionModule.APPLICATION.getValue());
+        ExecutionTimer.exportTimings(this.getClass().getSimpleName() + "_" + DateTool.getYYYYmmDDhhMMss() + ".txt");
         return Response.status(Response.Status.CREATED).entity(res).build();
     }
 

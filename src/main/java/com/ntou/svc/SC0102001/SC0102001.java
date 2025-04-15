@@ -2,9 +2,12 @@ package com.ntou.svc.SC0102001;
 
 import com.ntou.db.cuscredit.CuscreditDAO;
 import com.ntou.db.cuscredit.CuscreditVO;
+import com.ntou.svc.SC0101001.SC0101001;
 import com.ntou.sysintegrat.mailserver.JavaMail;
 import com.ntou.sysintegrat.mailserver.MailVO;
 import com.ntou.tool.Common;
+import com.ntou.tool.DateTool;
+import com.ntou.tool.ExecutionTimer;
 import com.ntou.tool.ResTool;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -17,6 +20,8 @@ import java.util.Random;
 @NoArgsConstructor
 public class SC0102001 {
     public Response doAPI(SC0102001Req req) throws Exception {
+        ExecutionTimer.startStage(ExecutionTimer.ExecutionModule.APPLICATION.getValue());
+
         log.info(Common.API_DIVIDER + Common.START_B + Common.API_DIVIDER);
         log.info(Common.REQ + req);
         SC0102001Res res = new SC0102001Res();
@@ -24,9 +29,11 @@ public class SC0102001 {
          if(!req.checkReq())
              ResTool.regularThrow(res, SC0102001RC.T121A.getCode(), SC0102001RC.T121A.getContent(), req.getErrMsg());
 
+        ExecutionTimer.startStage(ExecutionTimer.ExecutionModule.DATABASE.getValue());
          CuscreditDAO daoCuscredit = new CuscreditDAO();
          CuscreditVO voCuscredit = daoCuscredit.selectKey(
                  req.getCid(), req.getCardType());
+        ExecutionTimer.endStage(ExecutionTimer.ExecutionModule.DATABASE.getValue());
 
         String cusMail = "";
         if(voCuscredit == null)
@@ -57,6 +64,9 @@ public class SC0102001 {
 
         log.info(Common.RES + res);
         log.info(Common.API_DIVIDER + Common.END_B + Common.API_DIVIDER);
+
+        ExecutionTimer.endStage(ExecutionTimer.ExecutionModule.APPLICATION.getValue());
+        ExecutionTimer.exportTimings(SC0101001.class.getSimpleName() + "_" + DateTool.getYYYYmmDDhhMMss() + ".txt");
         return Response.status(Response.Status.OK).entity(res).build();
     }
 

@@ -3,6 +3,8 @@ package com.ntou.svc.SC0106001;
 import com.ntou.db.billrecord.BillrecordDAO;
 import com.ntou.db.billrecord.BillrecordVO;
 import com.ntou.tool.Common;
+import com.ntou.tool.DateTool;
+import com.ntou.tool.ExecutionTimer;
 import com.ntou.tool.ResTool;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -15,22 +17,29 @@ import java.util.ArrayList;
 @NoArgsConstructor
 public class SC0106001 {
     public Response doAPI(SC0106001Req req) throws Exception {
-        log.info(Common.API_DIVIDER + Common.START_B + Common.API_DIVIDER);
+		ExecutionTimer.startStage(ExecutionTimer.ExecutionModule.APPLICATION.getValue());
+
+		log.info(Common.API_DIVIDER + Common.START_B + Common.API_DIVIDER);
         log.info(Common.REQ + req);
         SC0106001Res res = new SC0106001Res();
 
         if(!req.checkReq())
             ResTool.regularThrow(res, SC0106001RC.T161A.getCode(), SC0106001RC.T161A.getContent(), req.getErrMsg());
 
+        ExecutionTimer.startStage(ExecutionTimer.ExecutionModule.DATABASE.getValue());
         ArrayList<BillrecordVO> billList = new BillrecordDAO()
                 .selectCusBillAll(voBillrecordSelect(req), req.getStartDate(), req.getEndDate());
+		ExecutionTimer.endStage(ExecutionTimer.ExecutionModule.DATABASE.getValue());
 
         ResTool.setRes(res, SC0106001RC.T1610.getCode(), SC0106001RC.T1610.getContent());
         res.setResult(billList);
 
         log.info(Common.RES + res);
         log.info(Common.API_DIVIDER + Common.END_B + Common.API_DIVIDER);
-        return Response.status(Response.Status.OK).entity(res).build();
+        
+		ExecutionTimer.endStage(ExecutionTimer.ExecutionModule.APPLICATION.getValue());
+        ExecutionTimer.exportTimings(this.getClass().getSimpleName() + "_" + DateTool.getYYYYmmDDhhMMss() + ".txt");
+		return Response.status(Response.Status.OK).entity(res).build();
     }
 
     private BillrecordVO voBillrecordSelect(SC0106001Req req){
