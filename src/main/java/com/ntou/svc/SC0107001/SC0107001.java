@@ -8,7 +8,6 @@ import com.ntou.sysintegrat.mailserver.JavaMail;
 import com.ntou.sysintegrat.mailserver.MailVO;
 import com.ntou.tool.Common;
 import com.ntou.tool.ExecutionTimer;
-import com.ntou.tool.ExecutionTimer;
 import com.ntou.tool.ResTool;
 import com.ntou.tool.DateTool;
 import lombok.NoArgsConstructor;

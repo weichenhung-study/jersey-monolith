@@ -22,14 +22,14 @@ public class SC0106002 {
         log.info(Common.REQ + req);
         SC0106002Res res = new SC0106002Res();
 
-            if(!req.checkReq())
-                ResTool.regularThrow(res, SC0106002RC.T162A.getCode(), SC0106002RC.T162A.getContent(), req.getErrMsg());
+        if(!req.checkReq())
+            ResTool.regularThrow(res, SC0106002RC.T162A.getCode(), SC0106002RC.T162A.getContent(), req.getErrMsg());
 
         ExecutionTimer.startStage(ExecutionTimer.ExecutionModule.DATABASE.getValue());
-            int updateResult = new BillrecordDAO()
-                    .updateDisputedFlag(voBillrecordSelect(req));
-            if(updateResult !=1)
-                ResTool.commonThrow(res, SC0106002RC.T162C.getCode(), SC0106002RC.T162C.getContent());
+        int updateResult = new BillrecordDAO()
+                .updateDisputedFlag(voBillrecordSelect(req));
+        if(updateResult !=1)
+            ResTool.commonThrow(res, SC0106002RC.T162C.getCode(), SC0106002RC.T162C.getContent());
         ExecutionTimer.endStage(ExecutionTimer.ExecutionModule.DATABASE.getValue());
 
         ResTool.setRes(res, SC0106002RC.T1620.getCode(), SC0106002RC.T1620.getContent());
