@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+
+  jersey-monolith:
+    build:
+      context: ../jersey-monolith
+    image: jersey-monolith-img
+    container_name: jersey-monolith-api
+    ports:
+      - "8071:8080"
+    networks:
+      - monolithnetwork
+
+networks:
+  monolithnetwork:
+    external: true  # 使用外部已存在的網路
