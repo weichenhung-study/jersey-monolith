@@ -33,7 +33,6 @@ public class SC0102001 {
          CuscreditDAO daoCuscredit = new CuscreditDAO();
          CuscreditVO voCuscredit = daoCuscredit.selectKey(
                  req.getCid(), req.getCardType());
-        ExecutionTimer.endStage(ExecutionTimer.ExecutionModule.DATABASE.getValue());
 
         String cusMail = "";
         if(voCuscredit == null)
@@ -41,9 +40,10 @@ public class SC0102001 {
         else
             cusMail = voCuscredit.getEmail();
 
-         int updateCount = daoCuscredit.updateCardApprovalStatus(voCuscreditUpdate(req));
-         if(updateCount !=1)
+        int updateCount = daoCuscredit.updateCardApprovalStatus(voCuscreditUpdate(req));
+        if(updateCount !=1)
             ResTool.commonThrow(res, SC0102001RC.T121C.getCode(), SC0102001RC.T121C.getContent());
+        ExecutionTimer.endStage(ExecutionTimer.ExecutionModule.DATABASE.getValue());
 
         if(req.getCardApprovalStatus().equals(CuscreditVO.CardApprovalStatus.PASS.getValue())){
             MailVO vo = new MailVO();
