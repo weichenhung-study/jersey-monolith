@@ -66,7 +66,7 @@ public class SC0102001 {
         log.info(Common.API_DIVIDER + Common.END_B + Common.API_DIVIDER);
 
         ExecutionTimer.endStage(ExecutionTimer.ExecutionModule.APPLICATION.getValue());
-        ExecutionTimer.exportTimings(SC0101001.class.getSimpleName() + "_" + DateTool.getYYYYmmDDhhMMss() + ".txt");
+        ExecutionTimer.exportTimings(this.getClass().getSimpleName() + "_" + DateTool.getYYYYmmDDhhMMss() + ".txt");
         return Response.status(Response.Status.OK).entity(res).build();
     }
 
